@@ -13,21 +13,38 @@ SMTP_PASS = os.getenv("SMTP_PASS")
 
 MAIL_FROM = os.getenv("MAIL_FROM", SMTP_USER)
 MAIL_TO = os.getenv("MAIL_TO")
+MAIL_CC = os.getenv("MAIL_CC", "")
+MAIL_BCC = os.getenv("MAIL_BCC", "")
+
+
+def parse_addresses(value: str) -> list[str]:
+    return [addr.strip() for addr in value.split(",") if addr.strip()]
 
 
 def main():
     if not all([SMTP_SERVER, SMTP_USER, SMTP_PASS, MAIL_TO]):
         raise RuntimeError("Missing SMTP configuration in .env")
 
+    to_addrs = parse_addresses(MAIL_TO)
+    cc_addrs = parse_addresses(MAIL_CC)
+    bcc_addrs = parse_addresses(MAIL_BCC)
+
     msg = EmailMessage()
     msg["From"] = MAIL_FROM
-    msg["To"] = MAIL_TO
+    msg["To"] = ", ".join(to_addrs)
     msg["Subject"] = "Sample Message"
+
+    if cc_addrs:
+        msg["Cc"] = ", ".join(cc_addrs)
+
+
     msg.set_content(
         "Hello,\n\n"
         "Lorem ipsum style placeholder email content for testing purposes\n\n"
         "Thank you."
     )
+
+    all_recipients = to_addrs + cc_addrs + bcc_addrs
 
     print(f"Connecting to {SMTP_SERVER}:{SMTP_PORT}...")
 
@@ -38,8 +55,14 @@ def main():
         smtp.login(SMTP_USER, SMTP_PASS)
         print("Authenticated")
 
-        smtp.send_message(msg)
-        print("Email sent successfully!")
+        smtp.sendmail(MAIL_FROM, all_recipients, msg.as_string())
+
+        summary = f"To: {', '.join(to_addrs)}"
+        if cc_addrs:
+            summary += f" | CC: {', '.join(cc_addrs)}"
+        if bcc_addrs:
+            summary += f" | BCC: {', '.join(bcc_addrs)}"
+        print(f"Email sent successfully! ({summary})")
 
 
 if __name__ == "__main__":
