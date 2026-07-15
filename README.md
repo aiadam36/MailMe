@@ -53,7 +53,9 @@ The script (`main.py`) parse email exactly like these:
 
 > If any of these requirements are not satisfied, the script will print an error and won't send
 
-Example valid `email.txt`:
+### Example email
+
+This is example of valid `email.txt`:
 
 ```
 Sample Message
@@ -65,7 +67,7 @@ Lorem ipsum style placeholder email content for testing purposes
 Thank you.
 ```
 
-Breakdown:
+#### Breakdown
 
 - `Sample Message` is the subject
 
@@ -73,7 +75,7 @@ Breakdown:
 
 - `Hello,` to `Thank you.` is basically the email body
 
-> **fyi**, we handle linebreak automatically by injecting `\n`
+> **fyi**, we handle linebreak automatically by injecting `\n` starting from **line 3** and so on
 
 ## Contributing
 
