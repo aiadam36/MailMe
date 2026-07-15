@@ -16,14 +16,51 @@ MAIL_TO = os.getenv("MAIL_TO")
 MAIL_CC = os.getenv("MAIL_CC", "")
 MAIL_BCC = os.getenv("MAIL_BCC", "")
 
+EMAIL_FILE = "email.txt"
+
 
 def parse_addresses(value: str) -> list[str]:
     return [addr.strip() for addr in value.split(",") if addr.strip()]
 
 
+def parse_email_file(path: str) -> tuple[str, str]:
+    if not os.path.exists(path):
+        raise ValueError(
+            "Email file not found"
+        )
+
+    with open(path, "r", encoding="utf-8") as f:
+        lines = f.read().splitlines()
+
+    if len(lines) == 0:
+        raise ValueError(
+            "File is completely empty"
+        )
+
+    subject = lines[0].strip()
+
+    if len(lines) == 1:
+        return subject, ""
+
+    if lines[1].strip() != "":
+        raise ValueError(
+            "Line 2 must be completely blank"
+        )
+
+    body = "\n".join(lines[2:]).strip()
+
+    return subject, body
+
+
 def main():
     if not all([SMTP_SERVER, SMTP_USER, SMTP_PASS, MAIL_TO]):
         raise RuntimeError("Missing SMTP configuration in .env")
+
+    try:
+        subject, body = parse_email_file(EMAIL_FILE)
+    except ValueError as e:
+        print(f"Error reading '{EMAIL_FILE}':\n{e}")
+        return
 
     to_addrs = parse_addresses(MAIL_TO)
     cc_addrs = parse_addresses(MAIL_CC)
@@ -32,17 +69,13 @@ def main():
     msg = EmailMessage()
     msg["From"] = MAIL_FROM
     msg["To"] = ", ".join(to_addrs)
-    msg["Subject"] = "Sample Message"
+    msg["Subject"] = subject
 
     if cc_addrs:
         msg["Cc"] = ", ".join(cc_addrs)
 
 
-    msg.set_content(
-        "Hello,\n\n"
-        "Lorem ipsum style placeholder email content for testing purposes\n\n"
-        "Thank you."
-    )
+    msg.set_content(body)
 
     all_recipients = to_addrs + cc_addrs + bcc_addrs
 
