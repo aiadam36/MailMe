@@ -23,11 +23,57 @@ Configure the `.env`:
 cp .env.example .env
 ```
 
-And then fill your credentials
+And then fill your credentials and recipient addresses
 
-After that, edit `main.py` to change the email subject and content
+After that, run any of this command:
 
-And then run: `python3 main.py`
+```bash
+cp email.txt.example email.txt # Use our email template (Easiest)
+```
+
+Or
+
+```bash
+touch email.txt # If you wanna write them yourself
+```
+
+To change the email subject and content, simply edit the `email.txt` (If you used `touch`, refer below!)
+
+And then run `python3 main.py` to send them
+
+### How to write the email (Especially if you used `touch`)
+
+The script (`main.py`) parse email exactly like these:
+
+- **Line 1** is subject
+- **Line 2** is a separator
+- **Line 3+** is the email body
+
+> For subject and email body, you can always leave them blank if you don't want any, but **line 2** must always be blank
+
+> If any of these requirements are not satisfied, the script will print an error and won't send
+
+Example valid `email.txt`:
+
+```
+Sample Message
+
+Hello,
+
+Lorem ipsum style placeholder email content for testing purposes
+
+Thank you.
+```
+
+Breakdown:
+
+- `Sample Message` is the subject
+
+- Between `Sample Message` and `Hello,` is the separator
+
+- `Hello,` to `Thank you.` is basically the email body
+
+> **fyi**, we handle linebreak automatically by injecting `\n`
 
 ## Contributing
 
